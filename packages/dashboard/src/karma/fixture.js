@@ -41,7 +41,7 @@ import ApiProvider from '../app/api/apiProvider';
 import { AppFrame } from '../components';
 import ApiProviderFixture from './apiProviderFixture';
 
-if ('true' === process.env.CI) {
+if ('true' === WEB_STORIES_CI) {
   configure({
     getElementError: (message) => {
       const error = new Error(message);

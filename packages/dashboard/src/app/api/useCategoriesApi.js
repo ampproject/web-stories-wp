@@ -28,7 +28,7 @@ import { addQueryArgs } from '@web-stories-wp/design-system';
 /**
  * Internal dependencies
  */
-import groupBy from '../../utils/groupBy';
+import { groupBy } from '../../utils';
 import fetchAllFromTotalPages from './fetchAllFromPages';
 
 export default function useCategoriesApi(dataAdapter, { categoryApi }) {

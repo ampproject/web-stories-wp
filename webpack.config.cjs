@@ -20,13 +20,13 @@
 const path = require('path');
 const glob = require('glob');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const RtlCssPlugin = require('rtlcss-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 /**
  * WordPress dependencies
@@ -60,28 +60,29 @@ const sharedConfig = {
     filename: '[name].js',
     chunkFilename: '[name]-[chunkhash].js',
     publicPath: '',
-    /**
-     * If multiple webpack runtimes (from different compilations) are used on the same webpage,
-     * there is a risk of conflicts of on-demand chunks in the global namespace.
-     *
-     * @see (@link https://webpack.js.org/configuration/output/#outputjsonpfunction)
-     */
-    jsonpFunction: '__webStories_webpackJsonp',
   },
+  target: 'browserslist',
   module: {
     rules: [
       !isProduction && {
-        test: /\.js$/,
+        test: /\.m?js$/,
         use: ['source-map-loader'],
         enforce: 'pre',
+        resolve: {
+          fullySpecified: false,
+        },
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         exclude: /node_modules/,
+        resolve: {
+          // Avoid having to provide full file extension for imports.
+          // See https://webpack.js.org/configuration/module/#resolvefullyspecified
+          fullySpecified: false,
+        },
         use: [
-          require.resolve('thread-loader'),
           {
-            loader: require.resolve('babel-loader'),
+            loader: 'babel-loader',
             options: {
               // Babel uses a directory within local node_modules
               // by default. Use the environment variable option
@@ -163,11 +164,19 @@ const sharedConfig = {
     new RtlCssPlugin({
       filename: `../css/[name]-rtl.css`,
     }),
-    new webpack.EnvironmentPlugin({
-      DISABLE_PREVENT: false,
-      DISABLE_OPTIMIZED_RENDERING: false,
-      DISABLE_ERROR_BOUNDARIES: false,
-      DISABLE_QUICK_TIPS: false,
+    new webpack.DefinePlugin({
+      WEB_STORIES_CI: JSON.stringify(process.env.CI),
+      WEB_STORIES_ENV: JSON.stringify(process.env.NODE_ENV),
+      WEB_STORIES_DISABLE_ERROR_BOUNDARIES: JSON.stringify(
+        process.env.DISABLE_ERROR_BOUNDARIES
+      ),
+      WEB_STORIES_DISABLE_OPTIMIZED_RENDERING: JSON.stringify(
+        process.env.DISABLE_OPTIMIZED_RENDERING
+      ),
+      WEB_STORIES_DISABLE_PREVENT: JSON.stringify(process.env.DISABLE_PREVENT),
+      WEB_STORIES_DISABLE_QUICK_TIPS: JSON.stringify(
+        process.env.DISABLE_QUICK_TIPS
+      ),
     }),
     new DependencyExtractionWebpackPlugin(),
   ].filter(Boolean),
@@ -179,8 +188,6 @@ const sharedConfig = {
     minimizer: [
       new TerserPlugin({
         parallel: true,
-        sourceMap: false,
-        cache: true,
         terserOptions: {
           // We preserve function names that start with capital letters as
           // they're _likely_ component names, and these are useful to have
@@ -192,7 +199,7 @@ const sharedConfig = {
         },
         extractComments: false,
       }),
-      new OptimizeCSSAssetsPlugin({}),
+      new CssMinimizerPlugin(),
     ],
   },
 };
@@ -205,7 +212,7 @@ const templateContent = ({ htmlWebpackPlugin }) => {
     pathname.substr(pathname.lastIndexOf('/') + 1);
 
   const chunkName = htmlWebpackPlugin.options.chunks[0];
-  const omitPrimaryChunk = (f) => f != chunkName;
+  const omitPrimaryChunk = (f) => f !== chunkName;
 
   const js = htmlWebpackPlugin.files.js
     .map((pathname) => {
