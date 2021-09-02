@@ -250,6 +250,7 @@ function APIProvider({ children }) {
           'status',
           'headers',
         ].join(','),
+        _embed: 'wp:featuredmedia',
       });
 
       if (mediaType) {
