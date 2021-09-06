@@ -20,8 +20,27 @@
 import { createURL, isCurrentURL } from '@wordpress/e2e-test-utils';
 
 /**
+ * Internal dependencies
+ */
+import getLoggedInUser from './getLoggedInUser';
+
+/**
  * Performs log in with specified username and password.
  *
+ * Sets username and password in login form with some extra hardening.
+ *
+ * Puppeteer appears to sometimes have issues with typing,
+ * where the first 1-2 characters are simply not typed.
+ *
+ * At the same time, there can be an issue where the password is not actually
+ * submitted (not part of the form data) when trying to log in.
+ *
+ * Hence not jst using `page.type()` alone but also some workarounds.
+ *
+ * The matchers at the end try to catch any errors where form submission
+ * is incomplete for some reason, to make debugging easier.
+ *
+ * @see https://github.com/puppeteer/puppeteer/issues/1648
  * @param {?string} username String to be used as user credential.
  * @param {?string} password String to be used as user credential.
  */
@@ -30,26 +49,40 @@ async function loginUser(username, password) {
     await page.goto(createURL('wp-login.php'));
   }
 
-  // Puppeteer appears to sometimes have issues with typing,
-  // where the first 1-2 characters are simply not typed.
-  // Hence not using page.type() as one would typically use.
-  // Should be OK since there are no event listeners on the login form.
-  // See https://github.com/puppeteer/puppeteer/issues/1648
+  const usernameInput = await page.waitForSelector('#user_login', {
+    visible: true,
+  });
+  await usernameInput.focus();
+  await usernameInput.type(username, { delay: 50 });
+  await usernameInput.evaluate((node, value) => (node.value = value), username);
 
-  await page.evaluate(
-    (value) => (document.getElementById('user_login').value = value),
-    username
-  );
-  await page.evaluate(
-    (value) => (document.getElementById('user_pass').value = value),
-    password
-  );
+  const passwordInput = await page.waitForSelector('#user_login', {
+    visible: true,
+  });
+  await passwordInput.focus();
+  await passwordInput.type(password, { delay: 50 });
+  await passwordInput.evaluate((node, value) => (node.value = value), password);
 
   await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
 
   await expect(page).not.toMatchElement('#login_error', {
+    text: /Password field is empty/i,
+  });
+
+  await expect(page).not.toMatchElement('#login_error', {
+    text: /Username field is empty/i,
+  });
+
+  await expect(page).not.toMatchElement('#login_error', {
     text: /Unknown username/i,
   });
+
+  await expect(page).not.toMatchElement('#login_error', {
+    text: /Error:/i,
+  });
+
+  const currentUser = await getLoggedInUser();
+  expect(currentUser).toMatch(username);
 }
 
 export default loginUser;

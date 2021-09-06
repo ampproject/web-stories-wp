@@ -17,15 +17,20 @@
 /**
  * Internal dependencies
  */
-import visitAdminPage from './visitAdminPage';
 import loginUser from './loginUser';
-import logoutUser from './logoutUser';
 
 const current = {
   username: null,
   password: null,
 };
 
+/**
+ * Sets the current user to the given one if different.
+ *
+ * @param {string} username Username.
+ * @param {string} password Password.
+ * @return {Promise<void>}
+ */
 export async function setCurrentUser(username, password) {
   if (username === null) {
     return;
@@ -35,21 +40,7 @@ export async function setCurrentUser(username, password) {
     return;
   }
 
-  await logoutUser();
-
   await loginUser(username, password);
-
-  await visitAdminPage('index.php');
-
-  const currentUser = await page.evaluate(
-    () => document.querySelector('.display-name')?.textContent || ''
-  );
-
-  expect(currentUser).toMatch(username);
-
-  await expect(page).toMatchElement('.display-name', {
-    text: username,
-  });
 
   current.username = username;
   current.password = password;
