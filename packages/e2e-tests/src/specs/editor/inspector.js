@@ -20,24 +20,24 @@ import { createNewStory, withUser } from '@web-stories-wp/e2e-test-utils';
 
 describe('Inspector', () => {
   describe('Document', () => {
-    it('should not display publisher logo', async () => {
+    it('should display publisher logo upload', async () => {
       await createNewStory();
 
       await expect(page).toClick('li[role="tab"]', { text: 'Document' });
-      await await expect(page).toMatchElement('[aria-label="Publisher Logo"]');
+      await expect(page).toMatchElement('[aria-label="Publisher Logo"]');
     });
     describe('Contributor User', () => {
       withUser('contributor', 'password');
 
-      it('should not display publisher logo', async () => {
+      // eslint-disable-next-line jest/no-disabled-tests
+      it.skip('should not display publisher logo upload', async () => {
         await createNewStory();
         await expect(page).toMatch('Howdy, contributor');
 
         await expect(page).toClick('li[role="tab"]', { text: 'Document' });
+        await expect(page).toClick('[aria-label="Publisher Logo"]');
 
-        await await expect(page).not.toMatchElement(
-          '[aria-label="Publisher Logo"]'
-        );
+        await expect(page).not.toMatchElement('[aria-label="Add new"]');
       });
     });
   });
