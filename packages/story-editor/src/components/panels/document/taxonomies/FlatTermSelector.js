@@ -18,6 +18,7 @@
  * External dependencies
  */
 import { useCallback, useDebouncedCallback } from '@web-stories-wp/react';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -27,7 +28,7 @@ import cleanForSlug from '../../../../utils/cleanForSlug';
 import { useTaxonomy } from '../../../../app/taxonomy';
 import { ContentHeading, TaxonomyPropType } from './shared';
 
-function FlatTermSelector({ taxonomy }) {
+function FlatTermSelector({ taxonomy, canCreateTerms }) {
   const {
     createTerm,
     termCache,
@@ -53,13 +54,18 @@ function FlatTermSelector({ taxonomy }) {
 
   const handleFreeformTermsChange = useCallback(
     (termNames) => {
+      // TODO(#9034): Allow assigning existing terms from autocomplete, but don't create terms if missing capability.
+      if (!canCreateTerms) {
+        return;
+      }
+
       termNames.forEach((termName) => createTerm(taxonomy, termName));
       setSelectedTaxonomySlugs(
         taxonomy,
         termNames.map((termName) => cleanForSlug(termName))
       );
     },
-    [taxonomy, createTerm, setSelectedTaxonomySlugs]
+    [taxonomy, createTerm, setSelectedTaxonomySlugs, canCreateTerms]
   );
 
   const handleFreeformInputChange = useDebouncedCallback((value) => {
@@ -100,6 +106,7 @@ function FlatTermSelector({ taxonomy }) {
 
 FlatTermSelector.propTypes = {
   taxonomy: TaxonomyPropType,
+  canCreateTerms: PropTypes.bool,
 };
 
 export default FlatTermSelector;

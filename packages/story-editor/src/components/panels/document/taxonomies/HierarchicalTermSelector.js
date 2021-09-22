@@ -43,7 +43,6 @@ import { v4 as uuidv4 } from 'uuid';
 /**
  * Internal dependencies
  */
-import { useConfig } from '../../../../app';
 import { HierarchicalInput } from '../../../form';
 import { useTaxonomy } from '../../../../app/taxonomy';
 import { ContentHeading, TaxonomyPropType } from './shared';
@@ -110,7 +109,11 @@ const AddNewCategoryButton = styled(Button).attrs({
   margin-top: 20px;
 `;
 
-function HierarchicalTermSelector({ noParentId = NO_PARENT_VALUE, taxonomy }) {
+function HierarchicalTermSelector({
+  noParentId = NO_PARENT_VALUE,
+  taxonomy,
+  canCreateTerms,
+}) {
   const { createTerm, selectedSlugs, setSelectedTaxonomySlugs, termCache } =
     useTaxonomy(
       ({
@@ -123,9 +126,6 @@ function HierarchicalTermSelector({ noParentId = NO_PARENT_VALUE, taxonomy }) {
         termCache,
       })
     );
-  const { canManageCategories } = useConfig(({ capabilities }) => ({
-    canManageCategories: capabilities?.canManageCategories,
-  }));
 
   const categories = useMemo(() => {
     if (termCache[taxonomy.restBase]) {
@@ -264,7 +264,7 @@ function HierarchicalTermSelector({ noParentId = NO_PARENT_VALUE, taxonomy }) {
         onChange={handleClickCategory}
         noOptionsText={taxonomy.labels.not_found}
       />
-      {canManageCategories ? (
+      {canCreateTerms ? (
         <>
           <LinkButton
             ref={toggleRef}
@@ -317,6 +317,7 @@ function HierarchicalTermSelector({ noParentId = NO_PARENT_VALUE, taxonomy }) {
 HierarchicalTermSelector.propTypes = {
   noParentId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   taxonomy: TaxonomyPropType,
+  canCreateTerms: PropTypes.bool,
 };
 
 export default HierarchicalTermSelector;
