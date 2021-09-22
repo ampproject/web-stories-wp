@@ -436,7 +436,7 @@ describe('Categories & Tags Panel', () => {
         const renderedTokens =
           fixture.screen.getAllByTestId(/^flat-term-token/);
         expect(renderedTokens.length).toEqual(
-          currentStoryTerms['web_story_tags'].length
+          currentStoryTerms['web_story_tag'].length
         );
       });
 
@@ -446,7 +446,7 @@ describe('Categories & Tags Panel', () => {
         const tag2Name = 'another tag';
 
         let currentStoryTerms = await getStoryTerms();
-        const initialTagsLength = currentStoryTerms['web_story_tags'].length;
+        const initialTagsLength = currentStoryTerms['web_story_tag'].length;
 
         const taxonomyPanel =
           fixture.editor.inspector.documentPanel.categoriesAndTags;
@@ -465,7 +465,7 @@ describe('Categories & Tags Panel', () => {
         // See that terms are persisted on the story
         await waitFor(async () => {
           currentStoryTerms = await getStoryTerms();
-          expect(currentStoryTerms['web_story_tags'].length).toEqual(
+          expect(currentStoryTerms['web_story_tag'].length).toEqual(
             initialTagsLength + 1
           );
         });
@@ -482,7 +482,7 @@ describe('Categories & Tags Panel', () => {
         // See that terms are persisted on the story
         await waitFor(async () => {
           currentStoryTerms = await getStoryTerms();
-          expect(currentStoryTerms['web_story_tags'].length).toEqual(
+          expect(currentStoryTerms['web_story_tag'].length).toEqual(
             initialTagsLength + 2
           );
         });
@@ -505,7 +505,7 @@ describe('Categories & Tags Panel', () => {
       it('can delete tags with keyboard', async () => {
         await openCategoriesAndTagsPanel();
         let currentStoryTerms = await getStoryTerms();
-        const initialTagsLength = currentStoryTerms['web_story_tags'].length;
+        const initialTagsLength = currentStoryTerms['web_story_tag'].length;
 
         const tagsInput =
           fixture.editor.inspector.documentPanel.categoriesAndTags.tagsInput;
@@ -629,7 +629,7 @@ describe('Categories & Tags Panel', () => {
         // See that terms are persisted on the story
         await waitFor(async () => {
           currentStoryTerms = await getStoryTerms();
-          expect(currentStoryTerms['web_story_tags'].length).toEqual(
+          expect(currentStoryTerms['web_story_tag'].length).toEqual(
             initialTagsLength - 1
           );
         });
@@ -646,7 +646,7 @@ describe('Categories & Tags Panel', () => {
         const taxonomyPanel =
           fixture.editor.inspector.documentPanel.categoriesAndTags;
         const initialTokens = fixture.screen.getAllByTestId(/^flat-term-token/);
-        const initialTagsLength = currentStoryTerms['web_story_tags'].length;
+        const initialTagsLength = currentStoryTerms['web_story_tag'].length;
 
         // delete tag with mouse
         const removeTagButtons = taxonomyPanel.tagTokenRemoveButtons;
@@ -660,7 +660,7 @@ describe('Categories & Tags Panel', () => {
         // See that terms are persisted on the story
         await waitFor(async () => {
           currentStoryTerms = await getStoryTerms();
-          expect(currentStoryTerms['web_story_tags'].length).toEqual(
+          expect(currentStoryTerms['web_story_tag'].length).toEqual(
             initialTagsLength - 1
           );
         });
