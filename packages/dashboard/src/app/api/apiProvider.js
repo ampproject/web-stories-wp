@@ -30,6 +30,7 @@ import useStoryApi from './useStoryApi';
 import useTemplateApi from './useTemplateApi';
 import useUsersApi from './useUserApi';
 import useSettingsApi from './useSettingsApi';
+import usePagesApi from './usePagesApi';
 
 export const ApiContext = createContext({ state: {}, actions: {} });
 
@@ -58,6 +59,10 @@ export default function ApiProvider({ children }) {
     globalStoriesSettingsApi: api.settings,
   });
 
+  const { api: pagesApi } = usePagesApi(dataAdapter, {
+    pagesApi: api.pages,
+  });
+
   const value = useMemo(
     () => ({
       state: {
@@ -73,6 +78,7 @@ export default function ApiProvider({ children }) {
         storyApi,
         templateApi,
         usersApi,
+        pagesApi,
       },
     }),
     [
@@ -86,6 +92,7 @@ export default function ApiProvider({ children }) {
       storyApi,
       templateApi,
       usersApi,
+      pagesApi,
     ]
   );
 

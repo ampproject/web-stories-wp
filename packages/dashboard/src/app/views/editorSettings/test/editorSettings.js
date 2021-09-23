@@ -39,6 +39,8 @@ const mockFetchSettings = jest.fn();
 const mockFetchMediaById = jest.fn();
 const mockUploadMedia = jest.fn();
 const mockUpdateSettings = jest.fn();
+const mockSearch = jest.fn();
+const mockGetPageById = jest.fn();
 
 function createProviderValues({
   canUploadFiles,
@@ -62,6 +64,7 @@ function createProviderValues({
       },
       maxUpload: 104857600,
       maxUploadFormatted: '100 MB',
+      archiveURL: 'https://example.com',
     },
     api: {
       state: {
@@ -74,6 +77,8 @@ function createProviderValues({
           activePublisherLogoId: activeLogoId,
           publisherLogoIds: logoIds,
           error: {},
+          archive: 'default',
+          archivePageId: 0,
         },
         media: {
           isLoading,
@@ -104,6 +109,10 @@ function createProviderValues({
           fetchMediaById: mockFetchMediaById,
         },
         usersApi: {},
+        pagesApi: {
+          searchPages: mockSearch,
+          getPageById: mockGetPageById,
+        },
       },
     },
   };
