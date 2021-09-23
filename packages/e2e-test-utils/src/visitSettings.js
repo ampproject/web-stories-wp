@@ -33,9 +33,12 @@ async function visitSettings() {
     text: 'Settings',
   });
 
-  await page.waitForResponse((response) =>
-    response.url().includes('web-stories/v1/media')
-  );
+  // Not using page.url() as it is buggy on Firefox.
+  // See https://github.com/puppeteer/puppeteer/issues/6787.
+  await page.waitForFunction(() => location.href.includes('#/editor-settings'));
+
+  await expect(page).toMatchElement('h2', { text: 'Settings' });
+  await expect(page).toMatch('Data Sharing Opt-in');
 }
 
 export default visitSettings;

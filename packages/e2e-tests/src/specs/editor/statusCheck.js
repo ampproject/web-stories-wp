@@ -17,48 +17,26 @@
 /**
  * External dependencies
  */
-import {
-  addRequestInterception,
-  createNewStory,
-} from '@web-stories-wp/e2e-test-utils';
+import { createNewStory, withPlugin } from '@web-stories-wp/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
 import { addAllowedErrorMessage } from '../../config/bootstrap';
 
+// TODO: Use request interception instead of WP plugins once supported in Firefox.
+// See https://bugzilla.mozilla.org/show_bug.cgi?id=1587857
 describe('Status Check', () => {
   let removeErrorMessage;
-  let stopRequestInterception;
-  let mockResponse;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     removeErrorMessage = addAllowedErrorMessage(
       'the server responded with a status of'
     );
-
-    await page.setRequestInterception(true);
-    stopRequestInterception = addRequestInterception((request) => {
-      if (
-        request.url().includes('/web-stories/v1/status-check/') &&
-        mockResponse
-      ) {
-        request.respond(mockResponse);
-        return;
-      }
-
-      request.continue();
-    });
   });
 
-  afterAll(async () => {
+  afterAll(() => {
     removeErrorMessage();
-    await page.setRequestInterception(false);
-    stopRequestInterception();
-  });
-
-  afterEach(() => {
-    mockResponse = undefined;
   });
 
   describe('200 OK', () => {
@@ -70,36 +48,27 @@ describe('Status Check', () => {
   });
 
   describe('Invalid JSON response', () => {
-    it('should display error dialog', async () => {
-      mockResponse = {
-        status: 200,
-        body: 'This is some unexpected content before the actual response.{"success":true}',
-      };
+    withPlugin('web-stories-test-plugin-status-check-200-invalid');
 
+    it('should display error dialog', async () => {
       await createNewStory();
       await expect(page).toMatch('Unable to save your story');
     });
   });
 
   describe('403 Forbidden (WAF)', () => {
-    it('should display error dialog', async () => {
-      mockResponse = {
-        status: 403,
-        body: 'Forbidden',
-      };
+    withPlugin('web-stories-test-plugin-status-check-403');
 
+    it('should display error dialog', async () => {
       await createNewStory();
       await expect(page).toMatch('Unable to save your story');
     });
   });
 
   describe('500 Internal Server Error', () => {
-    it('should display error dialog', async () => {
-      mockResponse = {
-        status: 500,
-        body: 'Forbidden',
-      };
+    withPlugin('web-stories-test-plugin-status-check-500');
 
+    it('should display error dialog', async () => {
       await createNewStory();
       await expect(page).toMatch('Unable to save your story');
     });

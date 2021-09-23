@@ -20,17 +20,28 @@
 import {
   createNewStory,
   publishStory,
-  triggerHighPriorityChecklistSection,
+  skipSuiteOnFirefox,
 } from '@web-stories-wp/e2e-test-utils';
 import percySnapshot from '@percy/puppeteer';
 
 describe('Pre-Publish Checklist', () => {
+  // Thew window size for Firefox is actually smaller than the viewport,
+  // causing the checklist button to be off-screen, thus failing the test.
+  skipSuiteOnFirefox();
+
   it('should show the checklist', async () => {
     await createNewStory();
     await expect(page).toClick('button[aria-label="Checklist"]');
-    await triggerHighPriorityChecklistSection();
+    await expect(page).toMatch(/You are all set for now/);
+
+    // The high priority section of the checklist will show once the story reaches 5 pages.
+    await expect(page).toClick('button[aria-label="Add New Page"]');
+    await expect(page).toClick('button[aria-label="Add New Page"]');
+    await expect(page).toClick('button[aria-label="Add New Page"]');
+    await expect(page).toClick('button[aria-label="Add New Page"]');
+
     await expect(page).toMatchElement(
-      '#pre-publish-checklist[data-isexpanded="true"]'
+      '[aria-label="Potential Story issues by category"][data-isexpanded="true"]'
     );
   });
 
@@ -46,7 +57,7 @@ describe('Pre-Publish Checklist', () => {
 
     await expect(page).toClick('button[aria-label^="Checklist: "]');
     await expect(page).toMatchElement(
-      '#pre-publish-checklist[data-isexpanded="true"]'
+      '[aria-label="Potential Story issues by category"][data-isexpanded="true"]'
     );
     await expect(page).toMatch('Add poster image');
     await percySnapshot(page, 'Prepublish checklist');
