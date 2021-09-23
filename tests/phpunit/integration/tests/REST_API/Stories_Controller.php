@@ -135,8 +135,8 @@ class Stories_Controller extends Test_REST_TestCase {
 		self::delete_user( self::$contributor_id );
 	}
 
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
@@ -148,7 +148,7 @@ class Stories_Controller extends Test_REST_TestCase {
 		$this->set_permalink_structure( '/%postname%/' );
 	}
 
-	public function tearDown() {
+	public function tear_down() {
 		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = null;
@@ -159,7 +159,7 @@ class Stories_Controller extends Test_REST_TestCase {
 
 		$this->kses_remove_filters();
 
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**
@@ -268,7 +268,7 @@ class Stories_Controller extends Test_REST_TestCase {
 		$edit_link = get_edit_post_link( $story, 'rest-api' );
 		$this->assertSame( $edit_link, $data['edit_link'] );
 		$this->assertArrayHasKey( 'embed_post_link', $data );
-		$this->assertContains( (string) $story, $data['embed_post_link'] );
+		$this->assertStringContainsString( (string) $story, $data['embed_post_link'] );
 	}
 
 	/**
@@ -398,7 +398,7 @@ class Stories_Controller extends Test_REST_TestCase {
 		$this->assertArrayHasKey( 'https://api.w.org/term', $links );
 		foreach ( $links['https://api.w.org/term'] as $taxonomy ) {
 			$this->assertArrayHasKey( 'href', $taxonomy );
-			$this->assertContains( 'web-stories/v1', $taxonomy['href'] );
+			$this->assertStringContainsString( 'web-stories/v1', $taxonomy['href'] );
 		}
 	}
 
