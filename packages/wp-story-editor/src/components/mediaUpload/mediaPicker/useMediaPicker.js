@@ -21,13 +21,17 @@ import { useCallback, useEffect, useMemo } from '@web-stories-wp/react';
 import { __ } from '@web-stories-wp/i18n';
 import { trackEvent } from '@web-stories-wp/tracking';
 import { useSnackbar } from '@web-stories-wp/design-system';
+import { useConfig, useAPI } from '@web-stories-wp/story-editor';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
  */
-import { useConfig } from '../../app/config';
-import { useAPI } from '../../app/api';
-import { calculateImageSelectOptions, mustBeCropped } from './utils';
+import {
+  calculateImageSelectOptions,
+  mustBeCropped,
+  getResourceFromMediaPicker,
+} from './utils';
 import WordPressImageCropper from './WordPressImageCropper';
 
 const defaultCropParams = {
@@ -52,7 +56,7 @@ const defaultCropParams = {
  * @param {Object} props.cropParams Object params for cropped images.
  * @return {Function} Callback to open the media picker.
  */
-export default function useMediaPicker({
+function useMediaPicker({
   title = __('Upload to Story', 'web-stories'),
   buttonInsertText = __('Insert into page', 'web-stories'),
   onSelect,
@@ -135,7 +139,7 @@ export default function useMediaPicker({
           return;
         }
         mediaPickerEl.alt = mediaPickerEl.alt || mediaPickerEl.title;
-        onSelect(mediaPickerEl);
+        onSelect(getResourceFromMediaPicker(mediaPickerEl));
       });
 
       if (onClose) {
@@ -227,7 +231,7 @@ export default function useMediaPicker({
           updateMedia(attachment.id, { media_source: 'editor', alt_text });
           attachment.alt = alt_text;
         }
-        onSelect(attachment);
+        onSelect(getResourceFromMediaPicker(attachment));
       });
 
       fileFrame.once('skippedcrop', () => {
@@ -237,7 +241,7 @@ export default function useMediaPicker({
           .first()
           .toJSON();
         mediaPickerEl.alt = mediaPickerEl.alt || mediaPickerEl.title;
-        onSelect(mediaPickerEl);
+        onSelect(getResourceFromMediaPicker(mediaPickerEl));
       });
 
       fileFrame.once('select', () => {
@@ -262,7 +266,7 @@ export default function useMediaPicker({
           !control.params.flex_height
         ) {
           mediaPickerEl.alt = mediaPickerEl.alt || mediaPickerEl.title;
-          onSelect(mediaPickerEl);
+          onSelect(getResourceFromMediaPicker(mediaPickerEl));
           fileFrame.close();
         } else {
           fileFrame.setState('cropper');
@@ -305,3 +309,20 @@ export default function useMediaPicker({
     return cropParams ? openCropper : openMediaDialog;
   }, [cropParams, openCropper, openMediaDialog]);
 }
+
+useMediaPicker.propTypes = {
+  title: PropTypes.string,
+  buttonInsertText: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+  onSelectErrorMessage: PropTypes.string,
+  onClose: PropTypes.func,
+  onPermissionError: PropTypes.func,
+  type: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
+  cropParams: PropTypes.object,
+  multiple: PropTypes.bool,
+};
+
+export default useMediaPicker;
