@@ -18,19 +18,14 @@
  */
 import { __ } from '@web-stories-wp/i18n';
 import { useCallback, useMemo } from '@web-stories-wp/react';
-
+import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
 import { useStory } from '../../../app/story';
 import { useHighlights } from '../../../app/highlights';
 import { DESIGN_COPY, MIN_STORY_CHARACTER_COUNT } from '../constants';
-import {
-  Thumbnail,
-  THUMBNAIL_TYPES,
-  THUMBNAIL_DIMENSIONS,
-} from '../../thumbnail';
-import PagePreview from '../../carousel/pagepreview';
+import { Thumbnail, THUMBNAIL_TYPES } from '../../thumbnail';
 import {
   ChecklistCard,
   CARD_TYPE,
@@ -40,6 +35,7 @@ import {
   characterCountForPage,
   filterStoryPages,
   getVisibleThumbnails,
+  ThumbnailPagePreview,
 } from '../utils';
 import { useRegisterCheck } from '../countContext';
 import { useIsChecklistMounted } from '../popupMountedContext';
@@ -48,7 +44,7 @@ export function pageTooLittleText(page) {
   return characterCountForPage(page) < MIN_STORY_CHARACTER_COUNT;
 }
 
-const PageTooLittleText = () => {
+const PageTooLittleText = ({ isVisible }) => {
   const isChecklistMounted = useIsChecklistMounted();
   const pages = useStory(({ state }) => state?.pages);
   const failingPages = useMemo(
@@ -85,13 +81,7 @@ const PageTooLittleText = () => {
               onClick={() => handleClick(page.id)}
               type={THUMBNAIL_TYPES.PAGE}
               displayBackground={
-                <PagePreview
-                  page={page}
-                  width={THUMBNAIL_DIMENSIONS.WIDTH}
-                  height={THUMBNAIL_DIMENSIONS.HEIGHT}
-                  as="div"
-                  label={__('The offending page', 'web-stories')}
-                />
+                isVisible ? <ThumbnailPagePreview page={page} /> : null
               }
               aria-label={__('Go to offending page', 'web-stories')}
             />
@@ -100,6 +90,10 @@ const PageTooLittleText = () => {
       }
     />
   ) : null;
+};
+
+PageTooLittleText.propTypes = {
+  isVisible: PropTypes.bool,
 };
 
 export default PageTooLittleText;

@@ -19,6 +19,7 @@
 import { useCallback, useMemo } from '@web-stories-wp/react';
 import { __ } from '@web-stories-wp/i18n';
 import { List, THEME_CONSTANTS } from '@web-stories-wp/design-system';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -26,12 +27,7 @@ import { List, THEME_CONSTANTS } from '@web-stories-wp/design-system';
 import { useStory } from '../../../app/story';
 import { useHighlights } from '../../../app/highlights';
 import { DESIGN_COPY, MAX_PAGE_CHARACTER_COUNT } from '../constants';
-import {
-  Thumbnail,
-  THUMBNAIL_TYPES,
-  THUMBNAIL_DIMENSIONS,
-} from '../../thumbnail';
-import PagePreview from '../../carousel/pagepreview';
+import { Thumbnail, THUMBNAIL_TYPES } from '../../thumbnail';
 import {
   ChecklistCard,
   CARD_TYPE,
@@ -41,6 +37,7 @@ import {
   characterCountForPage,
   filterStoryPages,
   getVisibleThumbnails,
+  ThumbnailPagePreview,
 } from '../utils';
 import { useRegisterCheck } from '../countContext';
 import { useIsChecklistMounted } from '../popupMountedContext';
@@ -59,7 +56,7 @@ export function pageTooMuchText(page) {
   return characterCountForPage(page) > MAX_PAGE_CHARACTER_COUNT;
 }
 
-const PageTooMuchText = () => {
+const PageTooMuchText = ({ isVisible }) => {
   const isChecklistMounted = useIsChecklistMounted();
   const pages = useStory(({ state }) => state?.pages);
   const failingPages = useMemo(
@@ -113,13 +110,7 @@ const PageTooMuchText = () => {
                 }
                 type={THUMBNAIL_TYPES.PAGE}
                 displayBackground={
-                  <PagePreview
-                    page={page}
-                    width={THUMBNAIL_DIMENSIONS.WIDTH}
-                    height={THUMBNAIL_DIMENSIONS.HEIGHT}
-                    as="div"
-                    label={__('The offending page', 'web-stories')}
-                  />
+                  isVisible ? <ThumbnailPagePreview page={page} /> : null
                 }
                 aria-label={__('Go to offending page', 'web-stories')}
               />
@@ -129,6 +120,10 @@ const PageTooMuchText = () => {
       />
     )
   );
+};
+
+PageTooMuchText.propTypes = {
+  isVisible: PropTypes.bool,
 };
 
 export default PageTooMuchText;
