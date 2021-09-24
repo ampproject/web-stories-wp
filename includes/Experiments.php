@@ -461,7 +461,7 @@ class Experiments extends Service_Base {
 			return (bool) $experiment['default'];
 		}
 
-		$experiments = get_option( Settings::SETTING_NAME_EXPERIMENTS );
+		$experiments = Services::get( 'settings' )->get_setting( Settings::SETTING_NAME_EXPERIMENTS, [] );
 		return ! empty( $experiments[ $name ] );
 	}
 
@@ -472,7 +472,7 @@ class Experiments extends Service_Base {
 	 *
 	 * @return array List of all enabled experiments.
 	 */
-	public function get_enabled_experiments() {
+	public function get_enabled_experiments(): array {
 		$experiments = array_filter(
 			wp_list_pluck( $this->get_experiments(), 'name' ),
 			[ $this, 'is_experiment_enabled' ]
